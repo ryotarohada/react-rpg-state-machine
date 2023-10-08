@@ -8,8 +8,10 @@ const PLAYER_LOST = "PLAYER_LOST";
 
 export const StateMachine = () => {
   // context
-  const [playerStatus, setPlayerStatus] = useState({ hp: 20, atk: 3 });
-  const [enemyStatus, setEnemyStatus] = useState({ hp: 10, atk: 2 });
+  const [playerStatus, setPlayerStatus] = useState({ hp: 20, atk: 3, spd: 3 });
+  const [enemyStatus, setEnemyStatus] = useState({ hp: 10, atk: 2, spd: 2 });
+  const [isPlayerEndTurn, setIsPlayerEndTurn] = useState(false);
+  const [isEnemyEndTurn, setIsEnemyEndTurn] = useState(false);
 
   // state
   const [battlePhase, setBattlePhase] = useState(SELECT);
@@ -52,6 +54,8 @@ export const StateMachine = () => {
   function actions() {
     switch (battlePhase) {
       case SELECT:
+        setIsPlayerEndTurn(false);
+        setIsEnemyEndTurn(false);
         break;
 
       case PLAYER_TURN:
@@ -59,6 +63,7 @@ export const StateMachine = () => {
           ...enemyStatus,
           hp: enemyStatus.hp - playerStatus.atk,
         });
+        setIsPlayerEndTurn(true);
         break;
 
       case ENEMY_TURN:
@@ -66,6 +71,7 @@ export const StateMachine = () => {
           ...playerStatus,
           hp: playerStatus.hp - enemyStatus.atk,
         });
+        setIsEnemyEndTurn(true);
         break;
       case PLAYER_WON:
         alert("You won!");
@@ -95,6 +101,11 @@ export const StateMachine = () => {
     }
   }, [playerStatus, enemyStatus]);
 
+  function decideFirstAttacker(spd_1, spd_2) {
+    const randomNum = Math.random() * (spd_1 + spd_2);
+    return randomNum <= spd_1;
+  }
+
   return (
     <>
       <div>
@@ -106,19 +117,49 @@ export const StateMachine = () => {
         {battlePhase === SELECT && (
           <>
             <p>プレイヤーの行動を選択</p>
-            <button onClick={playerTurnEvent}>Attack</button>
+            <button
+              onClick={() => {
+                if (decideFirstAttacker(playerStatus.spd, enemyStatus.spd)) {
+                  playerTurnEvent();
+                } else {
+                  enemyTurnEvent();
+                }
+              }}
+            >
+              Attack
+            </button>
           </>
         )}
         {battlePhase === PLAYER_TURN && (
           <>
             <p>プレイヤーは敵に{playerStatus.atk}のダメージを与えた</p>
-            <button onClick={enemyTurnEvent}>next</button>
+            <button
+              onClick={() => {
+                if (!isEnemyEndTurn) {
+                  enemyTurnEvent();
+                  return;
+                }
+                selectEvent();
+              }}
+            >
+              next
+            </button>
           </>
         )}
         {battlePhase === ENEMY_TURN && (
           <>
             <p>プレイヤーは{enemyStatus.atk}のダメージを受けた</p>
-            <button onClick={selectEvent}>next</button>
+            <button
+              onClick={() => {
+                if (!isPlayerEndTurn) {
+                  playerTurnEvent();
+                  return;
+                }
+                selectEvent();
+              }}
+            >
+              next
+            </button>
           </>
         )}
       </div>
