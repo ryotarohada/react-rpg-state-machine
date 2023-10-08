@@ -8,7 +8,7 @@ const PLAYER_LOST = "PLAYER_LOST";
 
 export const StateMachine = () => {
   // context
-  const [playerStatus, setPlayerStatus] = useState({ hp: 20, atk: 3, spd: 3 });
+  const [playerStatus, setPlayerStatus] = useState({ hp: 20, atk: 3, spd: 10 });
   const [enemyStatus, setEnemyStatus] = useState({ hp: 10, atk: 2, spd: 2 });
   const [isPlayerEndTurn, setIsPlayerEndTurn] = useState(false);
   const [isEnemyEndTurn, setIsEnemyEndTurn] = useState(false);
